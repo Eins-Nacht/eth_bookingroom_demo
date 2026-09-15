@@ -1,0 +1,103 @@
+@import url('https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@400;500;600;700;800&family=Barlow:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap');
+
+:root { --ink: #171717; --muted: #68645e; --paper: #f4f1eb; --soft: #e9e4dc; --line: #d4cec4; --orange: #f15a24; --orange-dark: #c74317; --black: #1b1b1b; --green: #397747; }
+* { box-sizing: border-box; }
+body { background: var(--paper); }
+button, select { font: inherit; }
+button { cursor: pointer; }
+button:disabled { cursor: not-allowed; opacity: .48; }
+.app-shell { max-width: 1440px; margin: 0 auto; padding: 0 5.2vw; color: var(--ink); }
+.topbar { min-height: 92px; display: flex; align-items: center; justify-content: space-between; gap: 24px; border-bottom: 3px solid var(--ink); }
+.brand { display: inline-flex; align-items: center; gap: 11px; font: 700 21px 'Barlow Condensed', sans-serif; letter-spacing: .01em; text-transform: uppercase; }
+.brand-mark { display: grid; width: 32px; height: 32px; place-items: center; background: var(--orange); color: white; font: 700 22px 'Barlow Condensed', sans-serif; transform: skew(-8deg); }
+.network-controls { display: flex; align-items: center; gap: 8px; margin-left: auto; }
+.network-label { color: var(--muted); font: 10px 'IBM Plex Mono', monospace; letter-spacing: .08em; }
+.network-label.supported { color: var(--green); }
+.network-label.unsupported { color: var(--orange-dark); }
+.network-controls select { border: 1px solid var(--line); border-radius: 0; padding: 9px 7px; background: var(--paper); color: var(--ink); font: 10px 'IBM Plex Mono', monospace; }
+.switch-button { border: 1px solid var(--orange); border-radius: 0; padding: 9px 10px; background: var(--orange); color: white; font: 600 10px 'IBM Plex Mono', monospace; }
+.switch-button:hover { background: var(--orange-dark); border-color: var(--orange-dark); }
+.wallet-button { border: 2px solid var(--ink); border-radius: 0; padding: 11px 17px; background: transparent; color: var(--ink); font: 600 11px 'IBM Plex Mono', monospace; white-space: nowrap; }
+.wallet-button:hover { background: var(--orange); border-color: var(--orange); color: white; }
+.wallet-button.connected { border-color: var(--green); color: var(--green); }
+.hero { min-height: 390px; display: flex; align-items: flex-end; justify-content: space-between; padding: 82px 7% 52px; background: linear-gradient(108deg, #eee9e0, var(--paper) 64%); margin-top: 18px; position: relative; overflow: hidden; border-left: 14px solid var(--orange); }
+.hero::before { content: 'ETH / STAY 01'; position: absolute; top: 30px; right: 7%; color: #b4aea5; font: 11px 'IBM Plex Mono', monospace; letter-spacing: .12em; }
+.hero::after { content: ''; position: absolute; width: 390px; height: 390px; border: 2px solid rgba(241, 90, 36, .22); border-radius: 50%; right: 12%; top: -170px; }
+.hero > div { position: relative; z-index: 1; }
+.eyebrow { color: var(--orange-dark); font: 500 11px/1 'IBM Plex Mono', monospace; letter-spacing: .13em; text-transform: uppercase; margin: 0 0 19px; }
+h1, h2, h3, p { margin-top: 0; }
+h1 { font: 700 clamp(53px, 6vw, 88px)/.86 'Barlow Condensed', sans-serif; letter-spacing: -.025em; text-transform: uppercase; margin: 0; }
+h1 em { color: var(--orange); font-style: normal; font-weight: 400; }
+.hero-text { width: 295px; margin: 27px 0 0; color: var(--muted); font-size: 13px; line-height: 1.65; }
+.hero-note { display: flex; align-items: flex-start; gap: 13px; margin-bottom: 10px; color: var(--muted); font: 11px/1.5 'IBM Plex Mono', monospace; }
+.note-line { width: 34px; height: 2px; margin-top: 7px; background: var(--orange); }
+.workspace, .booking-layout { padding: 75px 4% 0; }
+.section-heading { display: flex; justify-content: space-between; align-items: flex-end; margin-bottom: 24px; }
+h2 { margin: 0; font: 600 clamp(38px, 4vw, 58px)/.9 'Barlow Condensed', sans-serif; text-transform: uppercase; }
+.room-count { color: var(--muted); font: 10px 'IBM Plex Mono', monospace; }
+.notice { border-left: 4px solid var(--orange); background: var(--soft); margin: 0 0 25px; padding: 13px 16px; color: var(--muted); font: 11px/1.5 'IBM Plex Mono', monospace; }
+.notice.success { border-color: var(--green); }
+.notice.error { border-color: var(--orange-dark); color: var(--orange-dark); }
+.gas-notifications { position: fixed; top: 20px; right: 20px; z-index: 20; display: flex; width: min(350px, calc(100vw - 40px)); flex-direction: column; gap: 10px; pointer-events: none; }
+.gas-toast { display: flex; gap: 13px; border: 1px solid var(--ink); border-left: 5px solid var(--green); padding: 15px 16px; background: var(--paper); box-shadow: 5px 5px 0 rgba(23, 23, 23, .12); animation: gas-toast-in .25s ease-out, gas-toast-out .35s ease-in 4.1s forwards; pointer-events: auto; }
+.gas-toast-icon { display: grid; width: 28px; height: 28px; flex: 0 0 28px; place-items: center; background: var(--green); color: white; font-size: 15px; }
+.gas-toast div:last-child { display: flex; min-width: 0; flex-direction: column; gap: 4px; }
+.gas-toast strong { font: 600 16px 'Barlow Condensed', sans-serif; text-transform: uppercase; }
+.gas-toast span, .gas-toast small { color: var(--muted); font: 10px 'IBM Plex Mono', monospace; }
+.gas-toast small { color: var(--ink); }
+@keyframes gas-toast-in { from { opacity: 0; transform: translateY(-10px); } to { opacity: 1; transform: translateY(0); } }
+@keyframes gas-toast-out { to { opacity: 0; transform: translateY(-8px); } }
+.empty-state, .booking-empty { border: 1px dashed var(--line); padding: 25px; color: var(--muted); font: 12px/1.6 'IBM Plex Mono', monospace; }
+.room-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; }
+.room-card { min-height: 160px; display: flex; flex-direction: column; align-items: flex-start; justify-content: space-between; border: 1px solid var(--line); border-top: 5px solid var(--ink); padding: 20px; text-align: left; background: transparent; color: var(--ink); }
+.room-card:hover, .room-card.selected { border-color: var(--orange); background: var(--soft); }
+.room-id, .slot-heading, .date-control { color: var(--muted); font: 10px 'IBM Plex Mono', monospace; letter-spacing: .08em; text-transform: uppercase; }
+.room-card strong { font: 600 26px 'Barlow Condensed', sans-serif; text-transform: uppercase; }
+.room-card-bottom { display: flex; width: 100%; justify-content: space-between; gap: 12px; color: var(--muted); font: 10px 'IBM Plex Mono', monospace; }
+.select-mark { color: var(--orange-dark); }
+.add-room-form { display: flex; align-items: flex-end; gap: 10px; margin-top: 20px; padding-top: 20px; border-top: 1px solid var(--line); }
+.add-room-form div { display: flex; flex: 1; flex-direction: column; gap: 7px; }
+.add-room-form label { color: var(--muted); font: 10px 'IBM Plex Mono', monospace; text-transform: uppercase; }
+.add-room-form input { min-width: 0; border: 1px solid var(--line); border-radius: 0; padding: 12px; background: transparent; color: var(--ink); font-size: 13px; }
+.add-room-button { border: 0; border-radius: 0; padding: 13px 18px; background: var(--ink); color: white; font: 600 12px 'Barlow Condensed', sans-serif; text-transform: uppercase; }
+.add-room-button:hover:not(:disabled) { background: var(--orange); }
+.booking-layout { display: grid; grid-template-columns: minmax(0, 1.3fr) minmax(310px, .7fr); gap: 8.3%; padding-bottom: 95px; }
+.booking-panel { border-top: 4px solid var(--orange); padding-top: 24px; }
+.date-control { display: flex; flex-direction: column; gap: 9px; margin: 34px 0 28px; }
+.date-control select { width: 100%; border: 1px solid var(--ink); border-radius: 0; padding: 13px; background: var(--paper); color: var(--ink); font: 600 15px 'Barlow Condensed', sans-serif; text-transform: uppercase; }
+.slot-heading { display: flex; justify-content: space-between; border-bottom: 2px solid var(--ink); padding-bottom: 12px; }
+.slot-grid { display: grid; grid-template-columns: repeat(6, 1fr); gap: 7px; padding: 15px 0 25px; }
+.slot-button { display: flex; flex-direction: column; align-items: flex-start; gap: 7px; border: 1px solid var(--line); padding: 13px 10px; background: transparent; color: var(--ink); text-align: left; }
+.slot-button:hover:not(:disabled), .slot-button.selected { border-color: var(--orange); background: var(--orange); color: white; }
+.slot-button strong { font: 600 18px 'Barlow Condensed', sans-serif; }
+.slot-button small { font: 9px 'IBM Plex Mono', monospace; color: var(--muted); }
+.slot-button:hover:not(:disabled) small, .slot-button.selected small { color: white; }
+.booking-summary { display: flex; justify-content: space-between; gap: 15px; border-top: 1px solid var(--line); padding: 18px 0; color: var(--muted); font: 11px 'IBM Plex Mono', monospace; }
+.booking-summary strong { color: var(--ink); white-space: nowrap; }
+.booking-gas { color: var(--muted); font: 10px 'IBM Plex Mono', monospace; }
+.booking-selection-list { border-top: 1px solid var(--line); margin-bottom: 18px; }
+.booking-selection-list div { display: flex; justify-content: space-between; gap: 15px; border-bottom: 1px solid var(--line); padding: 10px 0; color: var(--muted); font: 10px 'IBM Plex Mono', monospace; }
+.booking-selection-list strong { color: var(--ink); white-space: nowrap; }
+.reserve-button { display: flex; width: 100%; justify-content: space-between; border: 0; border-radius: 0; padding: 17px 19px; background: var(--orange); color: white; font: 600 15px 'Barlow Condensed', sans-serif; letter-spacing: .04em; text-transform: uppercase; }
+.reserve-button:hover:not(:disabled) { background: var(--orange-dark); }
+.reserve-button span { font-size: 17px; }
+.my-booking { align-self: start; border-top: 4px solid var(--ink); padding-top: 24px; min-width: 0; }
+.reservation-heading { display: flex; align-items: flex-start; justify-content: space-between; gap: 18px; margin-bottom: 28px; }
+.reservation-heading .eyebrow { margin-bottom: 19px; }
+.reservation-navigation { display: flex; align-items: center; gap: 8px; color: var(--muted); font: 11px 'IBM Plex Mono', monospace; white-space: nowrap; }
+.reservation-navigation button { width: 28px; height: 28px; border: 1px solid var(--ink); border-radius: 0; background: transparent; color: var(--ink); font: 16px 'IBM Plex Mono', monospace; line-height: 1; }
+.reservation-navigation button:hover:not(:disabled) { border-color: var(--orange); background: var(--orange); color: white; }
+.reservation-navigation button:disabled { border-color: var(--line); color: var(--line); opacity: 1; }
+h3 { margin: 0 0 28px; font: 600 28px 'Barlow Condensed', sans-serif; text-transform: uppercase; }
+.booking-details { border-top: 1px solid var(--line); }
+.booking-details > div { display: flex; flex-direction: column; gap: 5px; border-bottom: 1px solid var(--line); padding: 14px 0; }
+.booking-details span { color: var(--muted); font: 10px 'IBM Plex Mono', monospace; text-transform: uppercase; }
+.booking-details strong { font: 600 17px 'Barlow Condensed', sans-serif; text-transform: uppercase; }
+.booking-details .active-status { color: var(--green); font: 11px 'IBM Plex Mono', monospace; text-transform: none; }
+.booking-details .inactive-status { color: var(--muted); font: 11px 'IBM Plex Mono', monospace; text-transform: none; }
+.cancel-button { margin-top: 18px; border: 1px solid var(--orange-dark); border-radius: 0; padding: 11px 14px; background: transparent; color: var(--orange-dark); font: 600 11px 'IBM Plex Mono', monospace; }
+.cancel-button:hover:not(:disabled) { background: var(--orange-dark); color: white; }
+footer { border-top: 3px solid var(--ink); display: flex; justify-content: space-between; padding: 24px 4% 30px; color: var(--muted); font: 10px 'IBM Plex Mono', monospace; }
+@media (max-width: 800px) { .app-shell { padding: 0 20px; } .topbar { min-height: 76px; flex-wrap: wrap; padding: 14px 0; } .network-controls { order: 3; width: 100%; margin-left: 0; } .network-controls .network-label { margin-right: auto; } .hero { min-height: 430px; padding: 65px 28px 40px; display: block; } .hero-note { margin-top: 52px; } .workspace, .booking-layout { padding-left: 0; padding-right: 0; } .room-grid { grid-template-columns: 1fr; } .add-room-form { align-items: stretch; flex-direction: column; } .add-room-button { width: 100%; } .booking-layout { grid-template-columns: 1fr; gap: 65px; } .slot-grid { grid-template-columns: repeat(3, 1fr); } footer { gap: 12px; flex-wrap: wrap; } }
+@media (max-width: 440px) { .reservation-heading { display: block; } .reservation-navigation { margin-top: 16px; } }
+@media (max-width: 440px) { .wallet-button { padding: 9px 10px; font-size: 9px; } h1 { font-size: 49px; } .hero-text { width: 230px; } .booking-summary { display: block; line-height: 1.8; } .booking-summary strong { display: block; } }
