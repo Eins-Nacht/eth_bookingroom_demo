@@ -238,7 +238,7 @@ export async function loadMyBookings(provider, network, rooms, address) {
       amount: booking.amount,
       active: booking.active,
     }))
-    .filter((booking) => booking.room)
+    .filter((booking) => booking.room && booking.active)
 }
 
 export async function submitBatchBooking(signer, network, bookings, totalPrice) {
@@ -257,7 +257,7 @@ export async function estimateBatchBookingFee(provider, network, bookings, total
   const feeData = await provider.getFeeData()
   const gasPrice = feeData.gasPrice ?? feeData.maxFeePerGas
   if (gasPrice == null) return null
-  return gasLimit * gasPrice
+  return { gasUsed: gasLimit, fee: gasLimit * gasPrice }
 }
 
 export async function submitAddRoom(signer, network, name, priceEth) {

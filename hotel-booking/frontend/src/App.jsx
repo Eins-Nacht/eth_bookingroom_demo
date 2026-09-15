@@ -41,7 +41,7 @@ function App() {
   const [availability, setAvailability] = useState([])
   const [selectedRoomIds, setSelectedRoomIds] = useState([])
   const [selectedDate, setSelectedDate] = useState(dates[0])
-  const [selectedHours, setSelectedHours] = useState([SLOT_HOURS[0]])
+  const [selectedHours, setSelectedHours] = useState([])
   const [reservations, setReservations] = useState([])
   const [currentReservationIndex, setCurrentReservationIndex] = useState(0)
   const [loading, setLoading] = useState(false)
@@ -52,6 +52,7 @@ function App() {
   const [newRoomPrice, setNewRoomPrice] = useState('1')
   const [gasNotifications, setGasNotifications] = useState([])
   const [estimatedGasFee, setEstimatedGasFee] = useState(null)
+  const [estimatedGasUsed, setEstimatedGasUsed] = useState(null)
 
   const dismissGasNotification = useCallback((notificationId) => {
     setGasNotifications((current) => current.filter((notification) => notification.id !== notificationId))
@@ -186,18 +187,26 @@ function App() {
   useEffect(() => {
     if (!wallet || !wallet.supported || !wallet.network?.contractAddress || !allSelectionsAvailable) {
       setEstimatedGasFee(null)
+      setEstimatedGasUsed(null)
       return undefined
     }
 
     let cancelled = false
     setEstimatedGasFee(null)
+    setEstimatedGasUsed(null)
 
     estimateBatchBookingFee(wallet.provider, wallet.network, bookingSelections, totalRoomPrice)
-      .then((fee) => {
-        if (!cancelled) setEstimatedGasFee(fee)
+      .then((estimate) => {
+        if (!cancelled) {
+          setEstimatedGasFee(estimate?.fee ?? null)
+          setEstimatedGasUsed(estimate?.gasUsed ?? null)
+        }
       })
       .catch(() => {
-        if (!cancelled) setEstimatedGasFee(null)
+        if (!cancelled) {
+          setEstimatedGasFee(null)
+          setEstimatedGasUsed(null)
+        }
       })
 
     return () => { cancelled = true }
@@ -253,11 +262,25 @@ function App() {
   }
 
   async function handleCancellation() {
-    const currentReservation = reservations[currentReservationIndex]
-    if (!wallet || !currentReservation || !currentReservation.active) return
+    const currentReservation = sortedReservations[safeReservationIndex]
+    if (!wallet) {
+      setTransactionStatus('error')
+      setMessage('Connect your wallet before cancelling a booking.')
+      return
+    }
+    if (!currentReservation || !currentReservation.active) {
+      setTransactionStatus('error')
+      setMessage('This reservation is no longer active. Refreshing reservations...')
+      setRefreshKey((key) => key + 1)
+      return
+    }
     setTransactionStatus('pending')
     setMessage('Confirm the cancellation transaction in MetaMask.')
     try {
+      console.log('Cancelling booking:', {
+        roomId: currentReservation.room.id,
+        startTime: currentReservation.startTime.toString(),
+      })
       const transaction = await submitCancellation(wallet.signer, wallet.network, currentReservation.room.id, currentReservation.startTime)
       setMessage('Waiting for cancellation confirmation...')
       const receipt = await transaction.wait()
@@ -268,6 +291,14 @@ function App() {
       setTransactionStatus('success')
       setMessage('Booking cancelled and the slot is available again.')
       setReservations((currentReservations) => currentReservations.filter((reservation) => reservation.id !== currentReservation.id))
+      setAvailability((currentAvailability) => currentAvailability.map((room) => {
+        if (room.id !== currentReservation.room.id) return room
+        const slots = room.slots.map((slot) => slot.startTime === currentReservation.startTime
+          ? { ...slot, available: true }
+          : slot)
+        return { ...room, slots, available: slots.some((slot) => slot.available) }
+      }))
+      setSelectedRoomIds((currentRoomIds) => currentRoomIds.filter((roomId) => roomId !== currentReservation.room.id))
       setCurrentReservationIndex(0)
       setRefreshKey((key) => key + 1)
     } catch (error) {
@@ -351,8 +382,8 @@ function App() {
           <div className="section-heading"><div><p className="eyebrow">02 / Reservation</p><h2>Select a slot</h2></div></div>
           <label className="date-control">Date<select value={selectedDate} onChange={(event) => setSelectedDate(event.target.value)}>{dates.map((date, index) => <option value={date} key={date}>{index === 0 ? `Today - ${formatDate(date)}` : formatDate(date)}</option>)}</select></label>
           <div className="slot-heading"><span>2-hour time slot</span><span>UTC / fixed schedule</span></div>
-          <div className="slot-grid">{SLOT_HOURS.map((hour) => { const available = selectedRooms.length === 0 ? availability.some((room) => room.slots.some((slot) => slot.hour === hour && slot.available)) : selectedRooms.every((room) => availability.find((item) => item.id === room.id)?.slots.some((slot) => slot.hour === hour && slot.available)); return <button className={`slot-button ${selectedHours.includes(hour) ? 'selected' : ''}`} disabled={!available || isBusy} type="button" key={hour} onClick={() => setSelectedHours((currentHours) => currentHours.includes(hour) ? currentHours.filter((currentHour) => currentHour !== hour) : [...currentHours, hour])}><strong>{formatTime(hour)}</strong><small>{available ? selectedHours.includes(hour) ? 'Selected' : 'Available' : 'Booked'}</small></button> })}</div>
-          <div className="booking-summary"><span>{bookingSelections.length ? `${bookingSelections.length} booking${bookingSelections.length === 1 ? '' : 's'} / ${formatDate(selectedDate)}` : `No selections / ${formatDate(selectedDate)}`}</span><strong>{bookingSelections.length ? `${formatEther(totalRoomPrice)} ETH` : 'None'} <small className="booking-gas">{estimatedGasFee != null ? `+ ~${formatEther(estimatedGasFee)} ${nativeCurrencySymbol} gas` : 'Gas: --'}</small></strong></div>
+          <div className="slot-grid">{SLOT_HOURS.map((hour) => { const available = selectedRooms.length > 0 && selectedRooms.every((room) => availability.find((item) => item.id === room.id)?.slots.some((slot) => slot.hour === hour && slot.available)); const booked = selectedRooms.length > 0 && !available; return <button className={`slot-button ${selectedHours.includes(hour) ? 'selected' : ''} ${booked ? 'booked' : ''}`} disabled={!available || isBusy} type="button" key={hour} onClick={() => setSelectedHours((currentHours) => currentHours.includes(hour) ? currentHours.filter((currentHour) => currentHour !== hour) : [...currentHours, hour])}><strong>{formatTime(hour)}</strong><small>{selectedRooms.length === 0 ? 'Select room first' : available ? selectedHours.includes(hour) ? 'Selected' : 'Available' : 'Booked'}</small></button> })}</div>
+          <div className="booking-summary"><span>{bookingSelections.length ? `${bookingSelections.length} booking${bookingSelections.length === 1 ? '' : 's'} / ${formatDate(selectedDate)}` : `No selections / ${formatDate(selectedDate)}`}</span><strong>{bookingSelections.length ? `${formatEther(totalRoomPrice)} ETH` : 'None'} <small className="booking-gas">{estimatedGasFee != null ? `+ ~${formatEther(estimatedGasFee)} ${nativeCurrencySymbol} gas (${estimatedGasUsed} gas)` : 'Gas: --'}</small></strong></div>
           <div className="booking-selection-list">{bookingSelections.map(({ room, slot }) => <div key={`${room.id}-${slot?.hour}`}><span>{room.name} / {formatDate(selectedDate)} / {formatTime(slot.hour)}</span><strong>{room.priceEth} ETH</strong></div>)}</div>
           <button className="reserve-button" disabled={!canUseContract || !allSelectionsAvailable || isBusy} type="button" onClick={handleBooking}>{isBusy ? 'Waiting for MetaMask...' : canUseContract ? 'Book selected slots' : 'Switch network to book'}<span>-&gt;</span></button>
         </div>
