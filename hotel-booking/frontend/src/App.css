@@ -71,6 +71,8 @@ h2 { margin: 0; font: 600 clamp(38px, 4vw, 58px)/.9 'Barlow Condensed', sans-ser
 .slot-button:hover:not(:disabled), .slot-button.selected { border-color: var(--orange); background: var(--orange); color: white; }
 .slot-button.booked { border-color: #e5a3a3; background: #f8dada; color: #8f3030; opacity: 1; }
 .slot-button.booked small { color: #8f3030; }
+.slot-button.no-room { border-color: var(--line); background: #e7e7e7; color: var(--muted); opacity: 1; }
+.slot-button.no-room small { color: var(--muted); }
 .slot-button strong { font: 600 18px 'Barlow Condensed', sans-serif; }
 .slot-button small { font: 9px 'IBM Plex Mono', monospace; color: var(--muted); }
 .slot-button:hover:not(:disabled) small, .slot-button.selected small { color: white; }
