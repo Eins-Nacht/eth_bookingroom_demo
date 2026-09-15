@@ -10,9 +10,9 @@ import {
   loadAvailability,
   loadMyBookings,
   loadRooms,
-  estimateBookingFee,
+  estimateBatchBookingFee,
   switchToNetwork,
-  submitBooking,
+  submitBatchBooking,
   submitAddRoom,
   submitCancellation,
 } from './services/roomBooking'
@@ -180,6 +180,7 @@ function App() {
     slot: selectedAvailability[roomIndex]?.slots.find((item) => item.hour === hour),
   })))
   const allSelectionsAvailable = bookingSelections.length > 0 && bookingSelections.every(({ slot }) => slot?.available)
+  const totalRoomPrice = bookingSelections.reduce((total, { room }) => total + room.price, 0n)
   const isBusy = transactionStatus === 'pending'
 
   useEffect(() => {
@@ -191,34 +192,30 @@ function App() {
     let cancelled = false
     setEstimatedGasFee(null)
 
-    Promise.all(bookingSelections.map(({ room, slot }) => estimateBookingFee(wallet.provider, wallet.network, room.id, slot.startTime, room.price)))
-      .then((fees) => {
-        const totalFee = fees.every((fee) => fee != null) ? fees.reduce((total, fee) => total + fee, 0n) : null
-        if (!cancelled) setEstimatedGasFee(totalFee)
+    estimateBatchBookingFee(wallet.provider, wallet.network, bookingSelections, totalRoomPrice)
+      .then((fee) => {
+        if (!cancelled) setEstimatedGasFee(fee)
       })
       .catch(() => {
         if (!cancelled) setEstimatedGasFee(null)
       })
 
     return () => { cancelled = true }
-  }, [wallet, selectedRoomIds, selectedHours, selectedDate, availability])
+  }, [wallet, selectedRoomIds, selectedHours, selectedDate, availability, totalRoomPrice])
 
   async function handleBooking() {
     if (!wallet || !allSelectionsAvailable) return
     setTransactionStatus('pending')
-    setMessage(`Confirm booking transaction 1 of ${bookingSelections.length} in MetaMask.`)
+    setMessage(`Confirm one transaction for ${bookingSelections.length} booking${bookingSelections.length === 1 ? '' : 's'} in MetaMask.`)
     try {
-      for (let index = 0; index < bookingSelections.length; index += 1) {
-        const { room, slot } = bookingSelections[index]
-        const transaction = await submitBooking(wallet.signer, wallet.network, room.id, slot.startTime, room.price)
-        console.log('Booking transaction submitted:', transaction.hash)
-        setMessage(`Waiting for booking ${index + 1} of ${selectedRooms.length} to confirm...`)
-        const receipt = await transaction.wait()
-        if (!receipt || (receipt.status !== 1 && receipt.status !== 1n)) {
-          throw new Error('Booking transaction failed.')
-        }
-        showGasNotification('Room Booked', transaction, receipt)
+      const transaction = await submitBatchBooking(wallet.signer, wallet.network, bookingSelections, totalRoomPrice)
+      console.log('Batch booking transaction submitted:', transaction.hash)
+      setMessage('Waiting for the booking transaction to confirm...')
+      const receipt = await transaction.wait()
+      if (!receipt || (receipt.status !== 1 && receipt.status !== 1n)) {
+        throw new Error('Booking transaction failed.')
       }
+      showGasNotification('Rooms Booked', transaction, receipt)
       setTransactionStatus('success')
       setMessage(`${bookingSelections.length} booking${bookingSelections.length === 1 ? '' : 's'} confirmed on-chain.`)
       setCurrentReservationIndex(0)
@@ -297,7 +294,6 @@ function App() {
 
   const currentNetworkName = wallet?.network?.name || 'Unsupported Network'
   const nativeCurrencySymbol = wallet?.network?.nativeCurrency?.symbol || 'ETH'
-  const totalRoomPrice = bookingSelections.reduce((total, { room }) => total + room.price, 0n)
   const canUseContract = Boolean(wallet?.supported && wallet.network?.contractAddress)
   const maxRoomsReached = rooms.length >= 4
   const needsNetworkSwitch = !wallet?.network || wallet.network.key !== selectedNetworkKey

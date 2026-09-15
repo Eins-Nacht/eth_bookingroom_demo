@@ -65,6 +65,27 @@ contract RoomBooking {
 		if (!rooms[roomId].exists) revert InvalidRoom();
 		if (!_isValidSlot(startTime)) revert InvalidSlot();
 		if (msg.value != rooms[roomId].price) revert IncorrectPayment();
+		_bookRoom(roomId, startTime, msg.value);
+	}
+
+	function bookRooms(uint256[] calldata roomIds, uint256[] calldata startTimes) external payable {
+		if (roomIds.length == 0 || roomIds.length != startTimes.length) revert InvalidSlot();
+
+		uint256 totalPrice;
+		for (uint256 index = 0; index < roomIds.length; index++) {
+			if (!rooms[roomIds[index]].exists) revert InvalidRoom();
+			if (!_isValidSlot(startTimes[index])) revert InvalidSlot();
+			if (slotBooking[roomIds[index]][startTimes[index]] != 0) revert SlotUnavailable();
+			totalPrice += rooms[roomIds[index]].price;
+		}
+		if (msg.value != totalPrice) revert IncorrectPayment();
+
+		for (uint256 index = 0; index < roomIds.length; index++) {
+			_bookRoom(roomIds[index], startTimes[index], rooms[roomIds[index]].price);
+		}
+	}
+
+	function _bookRoom(uint256 roomId, uint256 startTime, uint256 amount) internal {
 
 		uint256 slotId = startTime;
 		if (slotBooking[roomId][slotId] != 0) revert SlotUnavailable();
@@ -75,13 +96,13 @@ contract RoomBooking {
 			msg.sender,
 			roomId,
 			startTime,
-			msg.value,
+			amount,
 			true
 		);
 		slotBooking[roomId][slotId] = bookingId;
 		userBookings[msg.sender].push(bookingId);
 
-		emit RoomBooked(roomId, slotId, msg.sender, startTime, msg.value);
+		emit RoomBooked(roomId, slotId, msg.sender, startTime, amount);
 	}
 
 	function cancelBooking(uint256 roomId, uint256 slotId) external {

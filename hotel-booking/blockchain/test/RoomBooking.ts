@@ -62,6 +62,24 @@ describe("RoomBooking", function () {
     expect((await roomBooking.getBookingById(2)).startTime).to.equal(secondSlot);
   });
 
+  it("books multiple room slots in one transaction", async function () {
+    const roomBooking = await deployRoom();
+    const secondRoomPrice = ethers.parseEther("2");
+    const firstSlot = await nextSlot(1);
+    const secondSlot = await nextSlot(2);
+    await roomBooking.addRoom("City Room", secondRoomPrice);
+
+    await roomBooking.bookRooms(
+      [1, 2],
+      [firstSlot, secondSlot],
+      { value: ethers.parseEther("3") },
+    );
+
+    expect(await roomBooking.bookingCount()).to.equal(2n);
+    expect(await roomBooking.isSlotAvailable(1, firstSlot)).to.equal(false);
+    expect(await roomBooking.isSlotAvailable(2, secondSlot)).to.equal(false);
+  });
+
   it("allows at most four rooms", async function () {
     const roomBooking = await ethers.deployContract("RoomBooking");
 

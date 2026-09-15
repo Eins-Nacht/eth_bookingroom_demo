@@ -218,15 +218,6 @@ export async function loadAvailability(provider, network, room, dateKey) {
   return { ...room, slots, available: slots.some((slot) => slot.available) }
 }
 
-export async function estimateBookingFee(provider, network, roomId, startTime, price) {
-  const contract = getReadContract(provider, network)
-  const gasLimit = await contract.bookRoom.estimateGas(roomId, startTime, { value: price })
-  const feeData = await provider.getFeeData()
-  const gasPrice = feeData.gasPrice ?? feeData.maxFeePerGas
-  if (gasPrice == null) return null
-  return gasLimit * gasPrice
-}
-
 export async function loadMyBookings(provider, network, rooms, address) {
   const contract = getReadContract(provider, network)
   traceContractCall(contract, 'getUserBookings', [address])
@@ -250,10 +241,23 @@ export async function loadMyBookings(provider, network, rooms, address) {
     .filter((booking) => booking.room)
 }
 
-export async function submitBooking(signer, network, roomId, startTime, price) {
+export async function submitBatchBooking(signer, network, bookings, totalPrice) {
   const contract = getWriteContract(signer, network)
-  traceContractCall(contract, 'bookRoom', [roomId, startTime])
-  return contract.bookRoom(roomId, startTime, { value: price })
+  const roomIds = bookings.map(({ room }) => room.id)
+  const startTimes = bookings.map(({ slot }) => slot.startTime)
+  traceContractCall(contract, 'bookRooms', [roomIds, startTimes])
+  return contract.bookRooms(roomIds, startTimes, { value: totalPrice })
+}
+
+export async function estimateBatchBookingFee(provider, network, bookings, totalPrice) {
+  const contract = getReadContract(provider, network)
+  const roomIds = bookings.map(({ room }) => room.id)
+  const startTimes = bookings.map(({ slot }) => slot.startTime)
+  const gasLimit = await contract.bookRooms.estimateGas(roomIds, startTimes, { value: totalPrice })
+  const feeData = await provider.getFeeData()
+  const gasPrice = feeData.gasPrice ?? feeData.maxFeePerGas
+  if (gasPrice == null) return null
+  return gasLimit * gasPrice
 }
 
 export async function submitAddRoom(signer, network, name, priceEth) {
