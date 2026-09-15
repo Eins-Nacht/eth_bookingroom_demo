@@ -155,7 +155,7 @@ contract RoomBooking {
 
 	function _isValidSlot(uint256 startTime) internal view returns (bool) {
 		uint256 today = (block.timestamp / 1 days) * 1 days;
-		if (startTime <= block.timestamp || startTime < today) return false;
+		if (startTime < today) return false;
 		uint256 bookingDay = (startTime / 1 days) * 1 days;
 		if (bookingDay > today + MAX_ADVANCE) return false;
 

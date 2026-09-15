@@ -123,6 +123,16 @@ describe("RoomBooking", function () {
     expect(await roomBooking.isValidSlot(tooFar)).to.equal(false);
   });
 
+  it("allows a valid slot earlier today", async function () {
+    const roomBooking = await deployRoom();
+    const now = await currentTimestamp();
+    const todaySlot = BigInt(dayStart(now) + 9 * 60 * 60);
+
+    expect(await roomBooking.isValidSlot(todaySlot)).to.equal(true);
+    await roomBooking.bookRoom(1, todaySlot, { value: ethers.parseEther("1") });
+    expect(await roomBooking.isSlotAvailable(1, todaySlot)).to.equal(false);
+  });
+
   it("cancels a booking, refunds the guest, and releases the slot", async function () {
     const roomBooking = await deployRoom();
     const [guest] = await ethers.getSigners();
