@@ -273,6 +273,14 @@ export async function submitCancellation(signer, network, roomId, startTime) {
   return contract.cancelBooking(roomId, startTime)
 }
 
+export async function submitAllCancellations(signer, network, reservations) {
+  const contract = getWriteContract(signer, network)
+  const roomIds = reservations.map((reservation) => reservation.room.id)
+  const slotIds = reservations.map((reservation) => reservation.startTime)
+  traceContractCall(contract, 'cancelBookings', [roomIds, slotIds])
+  return contract.cancelBookings(roomIds, slotIds)
+}
+
 function findRevertName(error) {
   const errorData = [
     error?.data,

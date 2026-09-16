@@ -121,6 +121,29 @@ contract RoomBooking {
 		emit BookingCancelled(roomId, slotId, msg.sender);
 	}
 
+	function cancelBookings(uint256[] calldata roomIds, uint256[] calldata slotIds) external {
+		if (roomIds.length == 0 || roomIds.length != slotIds.length) revert InvalidSlot();
+
+		uint256 refund;
+		for (uint256 index = 0; index < roomIds.length; index++) {
+			uint256 bookingId = slotBooking[roomIds[index]][slotIds[index]];
+			Booking storage booking = bookings[bookingId];
+			if (!booking.active) revert SlotUnavailable();
+			if (booking.guest != msg.sender) revert NotGuest();
+			refund += booking.amount;
+		}
+
+		for (uint256 index = 0; index < roomIds.length; index++) {
+			uint256 bookingId = slotBooking[roomIds[index]][slotIds[index]];
+			bookings[bookingId].active = false;
+			slotBooking[roomIds[index]][slotIds[index]] = 0;
+			emit BookingCancelled(roomIds[index], slotIds[index], msg.sender);
+		}
+
+		(bool sent, ) = payable(msg.sender).call{value: refund}("");
+		if (!sent) revert TransferFailed();
+	}
+
 	function getBooking(uint256 roomId, uint256 slotId)
 		external
 		view

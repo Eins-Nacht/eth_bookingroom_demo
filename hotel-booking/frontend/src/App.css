@@ -38,15 +38,14 @@ h2 { margin: 0; font: 600 clamp(38px, 4vw, 58px)/.9 'Barlow Condensed', sans-ser
 .notice { border-left: 4px solid var(--orange); background: var(--soft); margin: 0 0 25px; padding: 13px 16px; color: var(--muted); font: 11px/1.5 'IBM Plex Mono', monospace; }
 .notice.success { border-color: var(--green); }
 .notice.error { border-color: var(--orange-dark); color: var(--orange-dark); }
-.gas-notifications { position: fixed; top: 20px; right: 20px; z-index: 20; display: flex; width: min(350px, calc(100vw - 40px)); flex-direction: column; gap: 10px; pointer-events: none; }
-.gas-toast { display: flex; gap: 13px; border: 1px solid var(--ink); border-left: 5px solid var(--green); padding: 15px 16px; background: var(--paper); box-shadow: 5px 5px 0 rgba(23, 23, 23, .12); animation: gas-toast-in .25s ease-out, gas-toast-out .35s ease-in 4.1s forwards; pointer-events: auto; }
+.gas-notifications { position: fixed; top: 20px; right: 20px; z-index: 20; display: flex; width: min(450px, calc(100vw - 40px)); flex-direction: column; gap: 12px; pointer-events: none; }
+.gas-toast { display: flex; gap: 16px; border: 1px solid var(--ink); border-left: 5px solid var(--green); padding: 20px 22px; background: var(--paper); box-shadow: 5px 5px 0 rgba(23, 23, 23, .12); animation: gas-toast-in .25s ease-out; cursor: pointer; pointer-events: auto; }
 .gas-toast-icon { display: grid; width: 28px; height: 28px; flex: 0 0 28px; place-items: center; background: var(--green); color: white; font-size: 15px; }
 .gas-toast div:last-child { display: flex; min-width: 0; flex-direction: column; gap: 4px; }
 .gas-toast strong { font: 600 16px 'Barlow Condensed', sans-serif; text-transform: uppercase; }
 .gas-toast span, .gas-toast small { color: var(--muted); font: 10px 'IBM Plex Mono', monospace; }
 .gas-toast small { color: var(--ink); }
 @keyframes gas-toast-in { from { opacity: 0; transform: translateY(-10px); } to { opacity: 1; transform: translateY(0); } }
-@keyframes gas-toast-out { to { opacity: 0; transform: translateY(-8px); } }
 .empty-state, .booking-empty { border: 1px dashed var(--line); padding: 25px; color: var(--muted); font: 12px/1.6 'IBM Plex Mono', monospace; }
 .room-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; }
 .room-card { min-height: 160px; display: flex; flex-direction: column; align-items: flex-start; justify-content: space-between; border: 1px solid var(--line); border-top: 5px solid var(--ink); padding: 20px; text-align: left; background: transparent; color: var(--ink); }

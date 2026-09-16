@@ -1,4 +1,3 @@
-import { useEffect } from 'react'
 import { formatEther } from 'ethers'
 
 function formatGas(value) {
@@ -10,19 +9,23 @@ function formatFee(value) {
 }
 
 function GasToast({ notification, onDismiss }) {
-  useEffect(() => {
-    const timeout = window.setTimeout(() => onDismiss(notification.id), 4500)
-    return () => window.clearTimeout(timeout)
-  }, [notification.id, onDismiss])
-
   return (
-    <article className="gas-toast" role="status">
+    <article
+      className="gas-toast"
+      role="button"
+      tabIndex="0"
+      aria-label="Dismiss gas notification"
+      onClick={() => onDismiss(notification.id)}
+      onKeyDown={(event) => {
+        if (event.key === 'Enter' || event.key === ' ') onDismiss(notification.id)
+      }}
+    >
       <div className="gas-toast-icon" aria-hidden="true">⛽</div>
       <div>
         <strong>Transaction Confirmed</strong>
         <span>{notification.type}</span>
         <small>Gas Used: {formatGas(notification.gasUsed)} gas</small>
-        {notification.fee != null && <small>Fee: {formatFee(notification.fee)}</small>}
+        {notification.fee != null && <small className="gas-toast-fee">Fee: {formatFee(notification.fee)}</small>}
       </div>
     </article>
   )

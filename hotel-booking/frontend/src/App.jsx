@@ -229,6 +229,7 @@ function App() {
       setMessage(`${bookingSelections.length} booking${bookingSelections.length === 1 ? '' : 's'} confirmed on-chain.`)
       setCurrentReservationIndex(0)
       setSelectedRoomIds([])
+      setSelectedHours([])
       setRefreshKey((key) => key + 1)
     } catch (error) {
       console.error('Booking transaction failed:', error)
